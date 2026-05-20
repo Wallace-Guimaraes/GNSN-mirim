@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>
+        {% block title %}
+            Guarda Mirim
+        {% endblock %}
+    </title>
+
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    {% include 'components/header.html' %}
+
+    <!-- body-main -->
+    <main class="main-content">
+        {% block body %}
+        {% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    {% include 'components/footer.html' %}
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

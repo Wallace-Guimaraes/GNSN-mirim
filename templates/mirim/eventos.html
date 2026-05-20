@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Eventos
+{% endblock %}
+
+{% block body %}
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/listaGuarda.css' %}">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" aria-label="Voltar">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="page-title">Eventos</span>
+  </div>
+  <button class="add-btn" onclick="alert('/guardas/novo')">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    Novo evento
+  </button>
+</header>
+
+<!-- HERO -->
+<div class="hero-strip">
+  <div class="hero-label">Listagem</div>
+  <div class="hero-row">
+    <div class="hero-title">Veja os eventos</div>
+    <div>
+      <div class="hero-count" id="heroCount">—</div>
+      <div class="hero-count-label">Ativos</div>
+    </div>
+  </div>
+</div>
+
+    <div style="display: flex; justify-content: center; margin-top: 10%;">
+        <button><a href="{% url 'mirim:cadastro_evento' %}">Cadastrar Evento</a></button>
+    </div>
+
+</body>
+{% endblock %}
