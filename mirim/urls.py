@@ -10,4 +10,5 @@ urlpatterns = [
     path("guardas/", views.listaGuarda, name="guardas"),
     path("cadastro-evento/", views.cadastroEvento, name="cadastro_evento"),
     path("eventos/", views.eventos, name="eventos"),
+    path("relatorio/", views.relatorio, name="relatorio"),
 ]

@@ -19,5 +19,8 @@ def cadastroEvento(request):
 
 def eventos(request):
     return render(request, "mirim/eventos.html")
+
+def relatorio(request):
+    return render(request, "mirim/relatorio.html")
  
  

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Frequência
+Cadastrar evento
 {% endblock %}
 
 {% block body %}
@@ -15,20 +15,6 @@ Frequência
 <link rel="stylesheet" href="{% static 'css/cadastroEvento.css' %}">
 </head>
 <body>
-
-<!-- TOPBAR -->
-<header class="topbar">
-  <div class="topbar-left">
-    <button class="back-btn" onclick="history.back()" aria-label="Voltar">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <div>
-      <div class="page-title">Cadastrar evento</div>
-    </div>
-  </div>
-</header>
 
 <!-- HERO STRIP -->
 <div class="hero-strip" style="background-color: #0c3967;">
@@ -202,7 +188,7 @@ Frequência
     </span>
     <div class="spinner"></div>
   </button>
-  <button class="btn-secondary" onclick="resetForm()">Limpar campos</button>
+  <button class="btn-secondary" style="margin-bottom: 50px;" onclick="resetForm()">Limpar campos</button>
 </div>
 
 <!-- TOAST -->

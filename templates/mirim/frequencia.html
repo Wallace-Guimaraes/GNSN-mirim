@@ -1,402 +1,517 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}
-Frequência
-{% endblock %}
+{% block title %}Frequência{% endblock %}
+
+{% block topbar_action %}{% endblock %}
 
 {% block body %}
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Frequência</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
-        <link rel="stylesheet" href="{% static 'css/frequencia.css' %}">
-</head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/listaGuarda.css' %}">
 
-<body>
+<style>
 
-    <!-- TOPBAR -->
-    <header class="topbar">
-        <div class="topbar-left">
-            <button class="back-btn" aria-label="Voltar">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-            </button>
-            <span class="page-title">Frequência</span>
-        </div>
-        <button class="export-btn" id="exportBtn" onclick="exportar()" disabled>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                <path d="M2 10v2h10v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-            </svg>
-            Exportar
-        </button>
-    </header>
+  /* ── PROGRESS ── */
+  .progress-wrap { padding: 14px 16px 0; }
+  .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .progress-label { font-size: 12px; font-weight: 500; color: var(--gray); }
+  .progress-frac  { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: var(--blue); }
+  .progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill  { height: 100%; background: var(--blue); border-radius: 3px; transition: width .35s ease; }
+ 
+  /* ── ADD INPUT ── */
+  .add-area { padding: 14px 16px 0; }
+  .add-wrap {
+    display: flex; gap: 8px; align-items: center;
+    background: var(--white);
+    border: 1.5px solid var(--border2);
+    border-radius: 10px;
+    padding: 6px 6px 6px 12px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .add-wrap:focus-within {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(24,95,165,.09);
+  }
+  .add-input {
+    flex: 1; border: none; outline: none;
+    font-family: 'Sora', sans-serif; font-size: 14px;
+    color: var(--dark); background: transparent;
+    min-width: 0;
+  }
+  .add-input::placeholder { color: var(--gray-light); }
+  .add-confirm-btn {
+    height: 34px; padding: 0 14px;
+    background: var(--blue); color: var(--white);
+    border: none; border-radius: 7px;
+    font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: opacity .15s, transform .1s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .add-confirm-btn:hover  { opacity: .88; }
+  .add-confirm-btn:active { transform: scale(.97); }
+  .add-hint { font-size: 11px; color: var(--gray-light); margin-top: 6px; padding: 0 2px; }
+ 
+  /* ── DROPDOWN SUGESTÕES ── */
+  .suggestions {
+    position: relative;
+  }
+  .suggestions-list {
+    position: absolute; top: 4px; left: 0; right: 0;
+    background: var(--white);
+    border: 1.5px solid var(--border2);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    z-index: 30; overflow: hidden;
+    display: none;
+  }
+  .suggestions-list.show { display: block; }
+  .sug-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; cursor: pointer;
+    transition: background .1s;
+    border-bottom: 1px solid var(--border);
+  }
+  .sug-item:last-child { border-bottom: none; }
+  .sug-item:hover { background: var(--blue-light); }
+  .sug-item.disabled { opacity: .4; cursor: not-allowed; }
+  .sug-item.disabled:hover { background: transparent; }
+  .sug-av { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+  .sug-info { flex: 1; min-width: 0; }
+  .sug-name { font-size: 13px; font-weight: 600; color: var(--dark); }
+  .sug-meta { font-size: 11px; color: var(--gray-light); font-family: 'JetBrains Mono', monospace; }
+  .sug-badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+  .sug-already { background: var(--green-bg); color: var(--green); }
+  .sug-empty { padding: 14px 12px; font-size: 13px; color: var(--gray-light); text-align: center; }
+ 
+  /* ── GUARD CARD — presença ── */
+  .guard-card.presente {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+  .guard-card.presente .guard-name { color: var(--green); }
+  .guard-card.presente .chevron   { color: var(--green); }
+ 
+  /* botão remover */
+  .remove-btn {
+    width: 28px; height: 28px; border-radius: 7px;
+    border: 1.5px solid var(--border2);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; color: var(--gray-light);
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .remove-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+ 
+  /* ── OBS INLINE ── */
+  .obs-wrap { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .25s ease, opacity .2s, margin .2s; }
+  .obs-wrap.show { max-height: 48px; opacity: 1; margin-top: 6px; }
+  .obs-input {
+    width: 100%; height: 32px;
+    border: 1.5px solid var(--border2); border-radius: 7px;
+    background: rgba(255,255,255,.7); color: var(--dark);
+    font-family: 'Sora', sans-serif; font-size: 12px;
+    padding: 0 10px; outline: none; transition: border-color .15s;
+  }
+  .obs-input:focus { border-color: var(--blue); }
+ 
+  /* ── SAVE FOOTER ── */
+  .save-footer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex; gap: 10px; z-index: 40;
+  }
+  .btn-save {
+    flex: 1; height: 46px;
+    background: var(--blue); color: var(--white);
+    border: none; border-radius: 10px;
+    font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn-save:hover  { opacity: .88; }
+  .btn-save:active { transform: scale(.98); }
+  .btn-save:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-cancel {
+    height: 46px; padding: 0 18px;
+    background: transparent; border: 1.5px solid var(--border2); border-radius: 10px;
+    font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 500;
+    color: var(--gray); cursor: pointer; transition: background .15s;
+  }
+  .btn-cancel:hover { background: var(--bg); }
+ 
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+  .btn-save.loading .spinner { display: block; }
+  .btn-save.loading .btn-txt { display: none; }
+ 
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: 78px; left: 16px; right: 16px; background: var(--dark); color: var(--white); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; z-index: 100; transform: translateY(20px); opacity: 0; transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s; pointer-events: none; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--amber); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+ 
+  /* ── EMPTY ── */
+  .empty-state { text-align: center; padding: 40px 20px; display: none; }
+  .empty-state.show { display: block; }
+  .empty-icon { width: 52px; height: 52px; border-radius: 14px; background: var(--white); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .empty-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .empty-sub   { font-size: 13px; color: var(--gray-light); }
+ 
+  body { padding-bottom: 90px; }
 
-    <!-- HERO -->
-    <div class="hero-strip">
-        <div class="hero-label">Relatório</div>
-        <div class="hero-title">Frequência do efetivo</div>
-        <div class="hero-stats">
-            <div class="stat-box">
-                <div class="stat-val" id="heroTotal">—</div>
-                <div class="stat-label">Guardas analisados</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-val green" id="heroMedia">—</div>
-                <div class="stat-label">Média geral</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-val blue" id="heroEventos">—</div>
-                <div class="stat-label">Eventos no período</div>
-            </div>
-        </div>
+</style>
+
+<!-- HERO -->
+<div class="hero-strip">
+  <div class="hero-label">Chamada</div>
+  <div class="hero-row">
+    <div>
+      <div class="hero-title">{{ evento.categoria.nome }}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.45);margin-top:2px">
+        {{ evento.local.nome }} · {{ evento.data|date:"d/m/Y" }} · {{ evento.hora|time:"H:i" }}
+      </div>
     </div>
-
-    <!-- FILTER CARD -->
-    <div class="filter-card">
-        <div class="filter-card-title">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M1 2h10M3 6h6M5 10h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-            </svg>
-            Filtros
-        </div>
-        <div class="filter-grid">
-            <div class="filter-field">
-                <label class="filter-label">Data início</label>
-                <input class="filter-input" type="date" id="dataInicio">
-            </div>
-            <div class="filter-field">
-                <label class="filter-label">Data fim</label>
-                <input class="filter-input" type="date" id="dataFim">
-            </div>
-            <div class="filter-field">
-                <label class="filter-label">Ministério</label>
-                <select class="filter-select" id="filtroMinisterio">
-                    <option value="">Todos</option>
-                    <option value="nazare">N.S. Nazaré</option>
-                    <option value="andre">Santo André</option>
-                </select>
-            </div>
-            <div class="filter-field">
-                <label class="filter-label">Status</label>
-                <select class="filter-select" id="filtroStatus">
-                    <option value="">Todos</option>
-                    <option value="ativo">Ativos</option>
-                    <option value="inativo">Inativos</option>
-                    <option value="licenca">Licença</option>
-                </select>
-            </div>
-            <div class="filter-field filter-full">
-                <label class="filter-label">Guarda específico</label>
-                <select class="filter-select" id="filtroGuarda">
-                    <option value="">Todos os guardas</option>
-                    <option value="1">Ana Paula Figueiredo</option>
-                    <option value="2">Bruno Tavares Lima</option>
-                    <option value="3">Carla Mendes Souza</option>
-                    <option value="4">Diego Costa Ramos</option>
-                    <option value="5">Elaine Rodrigues</option>
-                    <option value="6">Felipe Araújo Neto</option>
-                    <option value="7">Gabriela Moraes</option>
-                    <option value="8">Henrique Pinheiro</option>
-                </select>
-            </div>
-        </div>
-        <button class="apply-btn" id="applyBtn" onclick="gerarRelatorio()">
-            <span class="btn-txt">Gerar relatório</span>
-            <div class="spinner-sm"></div>
-        </button>
+    <div style="text-align:right">
+      <div class="hero-count" id="heroPresentes">0</div>
+      <div class="hero-count-label">presentes</div>
     </div>
+  </div>
+</div>
 
-    <!-- RESULT (hidden initially) -->
-    <div id="resultSection" style="display:none">
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-header">
+    <span class="progress-label">Progresso da chamada</span>
+    <span class="progress-frac" id="progressFrac">0 adicionados</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+</div>
 
-        <!-- SUMMARY CARDS -->
-        <div class="section-label">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.3" />
-                <path d="M4 6h4M4 4h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-            </svg>
-            Resumo
-            <div class="section-line"></div>
+<!-- ADD FIELD -->
+<div class="add-area">
+  <div class="suggestions">
+    <div class="add-wrap">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0;color:var(--gray-light)">
+        <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M10.5 10.5L13 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <input
+        class="add-input"
+        id="addInput"
+        type="text"
+        placeholder="Digite nome ou matrícula do guarda…"
+        oninput="onAddInput()"
+        onkeydown="onAddKey(event)"
+        autocomplete="off"
+      >
+      <button class="add-confirm-btn" onclick="adicionarSelecionado()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Adicionar
+      </button>
+    </div>
+    <div class="suggestions-list" id="suggestionsList"></div>
+  </div>
+  <p class="add-hint">Digite pelo menos 2 caracteres para buscar · Enter para adicionar o primeiro resultado</p>
+</div>
+
+<!-- SORT BAR -->
+<div class="sort-bar">
+  <span class="count-label">
+    <strong id="countLabel">0</strong> presente{{ '' }}s registrados
+  </span>
+  <select class="sort-select" onchange="reordenarLista(this.value)">
+    <option value="nome">Nome A–Z</option>
+    <option value="recente">Mais recente</option>
+  </select>
+</div>
+
+<!-- LISTA DE PRESENÇA -->
+<div class="guard-list" id="guardList"></div>
+
+<!-- EMPTY STATE -->
+<div class="empty-state show" id="emptyState">
+  <div class="empty-icon">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <circle cx="11" cy="8" r="3.5" stroke="#9ca3af" stroke-width="1.4"/>
+      <path d="M4 18c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <p class="empty-title">Nenhuma presença registrada</p>
+  <p class="empty-sub">Busque um guarda acima para iniciar a chamada</p>
+</div>
+
+<!-- FOOTER -->
+<div class="save-footer">
+  <button class="btn-cancel" onclick="history.back()">Cancelar</button>
+  <button class="btn-save" id="btnSalvar" onclick="salvarChamada()" disabled>
+    <span class="btn-txt">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="vertical-align:middle">
+        <path d="M2 7l4 4 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Salvar chamada
+    </span>
+    <div class="spinner"></div>
+  </button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M2 6l3 3 5-5" stroke="#111827" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <span id="toastMsg">Chamada salva!</span>
+</div>
+
+<script>
+  // ── dados vindos do Django ────────────────────────────────────
+  // Em produção, substitua este array pelo JSON do contexto:
+  // const GUARDAS = {{ guardas_json|safe }};
+  const GUARDAS = [
+    { id:1,  nome:'Ana Paula Figueiredo',  matricula:'0001', ministerio:'N.S. Nazaré', status:'ativo' },
+    { id:2,  nome:'Bruno Tavares Lima',    matricula:'0002', ministerio:'N.S. Nazaré', status:'ativo' },
+    { id:3,  nome:'Carla Mendes Souza',    matricula:'0047', ministerio:'Santo André',  status:'ativo' },
+    { id:4,  nome:'Diego Costa Ramos',     matricula:'0012', ministerio:'N.S. Nazaré', status:'licenca' },
+    { id:5,  nome:'Elaine Rodrigues',      matricula:'0018', ministerio:'Santo André',  status:'ativo' },
+    { id:6,  nome:'Felipe Araújo Neto',    matricula:'0033', ministerio:'N.S. Nazaré', status:'inativo' },
+    { id:7,  nome:'Gabriela Moraes',       matricula:'0025', ministerio:'Santo André',  status:'ativo' },
+    { id:8,  nome:'Henrique Pinheiro',     matricula:'0055', ministerio:'N.S. Nazaré', status:'ativo' },
+    { id:9,  nome:'Isabela Costa Freitas', matricula:'0031', ministerio:'Santo André',  status:'ativo' },
+    { id:10, nome:'João Victor Almeida',   matricula:'0008', ministerio:'N.S. Nazaré', status:'inativo' },
+    { id:11, nome:'Karen Souza Pantoja',   matricula:'0038', minerterio:'Santo André',  status:'ativo' },
+    { id:12, nome:'Lucas Ferreira Braga',  matricula:'0019', ministerio:'N.S. Nazaré', status:'licenca' },
+  ];
+
+  const AV_COLORS = ['av-gray'];
+
+  // ── estado ────────────────────────────────────────────────────
+  let presentes   = [];   // [{...guarda, obs:'', adicionadoEm: Date}]
+  let sugestaoSel = null; // guarda selecionado no dropdown
+  let sortAtual   = 'recente';
+
+  // ── helpers ───────────────────────────────────────────────────
+  function initials(nome) {
+    return nome.trim().split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  }
+  function avColor(id) {
+    return AV_COLORS[id % AV_COLORS.length];
+  }
+  function jaAdicionado(id) {
+    return presentes.some(p => p.id === id);
+  }
+
+  // ── dropdown de sugestões ─────────────────────────────────────
+  function onAddInput() {
+    sugestaoSel = null;
+    const q = document.getElementById('addInput').value.toLowerCase().trim();
+    const list = document.getElementById('suggestionsList');
+
+    if (q.length < 2) { list.classList.remove('show'); return; }
+
+    const matches = GUARDAS.filter(g =>
+      g.nome.toLowerCase().includes(q) || g.matricula.includes(q)
+    ).slice(0, 6);
+
+    if (!matches.length) {
+      list.innerHTML = '<div class="sug-empty">Nenhum guarda encontrado</div>';
+      list.classList.add('show');
+      return;
+    }
+
+    list.innerHTML = matches.map(g => {
+      const ja  = jaAdicionado(g.id);
+      const av  = avColor(g.id);
+      return `
+      <div
+        class="sug-item${ja ? ' disabled' : ''}"
+        onclick="${ja ? '' : `selecionarSugestao(${g.id})`}"
+        data-id="${g.id}"
+      >
+        <div class="sug-av ${av}">${initials(g.nome)}</div>
+        <div class="sug-info">
+          <div class="sug-name">${g.nome}</div>
+          <div class="sug-meta">${g.matricula} · ${g.ministerio || ''}</div>
         </div>
-        <div class="summary-row">
-            <div class="summary-card accent">
-                <div class="s-val amber" id="sumPresentes">—</div>
-                <div class="s-lbl">Presenças registradas</div>
-            </div>
-            <div class="summary-card blue">
-                <div class="s-val blue" id="sumMedia">—</div>
-                <div class="s-lbl">Média de frequência</div>
-            </div>
-            <div class="summary-card">
-                <div class="s-val" id="sumRegulares">—</div>
-                <div class="s-lbl">Acima de 75%</div>
-            </div>
-            <div class="summary-card">
-                <div class="s-val" id="sumIrregulares">—</div>
-                <div class="s-lbl">Abaixo de 50%</div>
-            </div>
+        ${ja ? '<span class="sug-badge sug-already">✓ Presente</span>' : ''}
+      </div>`;
+    }).join('');
+
+    list.classList.add('show');
+  }
+
+  function onAddKey(e) {
+    if (e.key === 'Enter') { adicionarSelecionado(); }
+    if (e.key === 'Escape') { fecharDropdown(); }
+  }
+
+  function selecionarSugestao(id) {
+    const g = GUARDAS.find(x => x.id === id);
+    if (!g || jaAdicionado(id)) return;
+    sugestaoSel = g;
+    document.getElementById('addInput').value = g.nome;
+    fecharDropdown();
+    adicionarSelecionado();
+  }
+
+  function fecharDropdown() {
+    document.getElementById('suggestionsList').classList.remove('show');
+  }
+
+  // fechar ao clicar fora
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.suggestions')) fecharDropdown();
+  });
+
+  // ── adicionar ─────────────────────────────────────────────────
+  function adicionarSelecionado() {
+    const input = document.getElementById('addInput');
+    const q     = input.value.toLowerCase().trim();
+
+    // se já tem um selecionado via dropdown, usa ele
+    let guarda = sugestaoSel;
+
+    // senão tenta match exato pelo que está no input
+    if (!guarda && q.length >= 2) {
+      guarda = GUARDAS.find(g =>
+        g.nome.toLowerCase().includes(q) || g.matricula.includes(q)
+      );
+    }
+
+    if (!guarda) {
+      showToast('Guarda não encontrado');
+      return;
+    }
+    if (jaAdicionado(guarda.id)) {
+      showToast(`${guarda.nome.split(' ')[0]} já está na lista`);
+      input.value = '';
+      sugestaoSel = null;
+      fecharDropdown();
+      return;
+    }
+
+    presentes.push({ ...guarda, obs: '', adicionadoEm: new Date() });
+    sugestaoSel = null;
+    input.value = '';
+    fecharDropdown();
+    renderLista();
+  }
+
+  // ── remover ───────────────────────────────────────────────────
+  function remover(id) {
+    presentes = presentes.filter(p => p.id !== id);
+    renderLista();
+  }
+
+  // ── ordenar ───────────────────────────────────────────────────
+  function reordenarLista(v) {
+    sortAtual = v;
+    renderLista();
+  }
+
+  function getSorted() {
+    return [...presentes].sort((a, b) => {
+      if (sortAtual === 'nome')    return a.nome.localeCompare(b.nome);
+      if (sortAtual === 'recente') return b.adicionadoEm - a.adicionadoEm;
+      return 0;
+    });
+  }
+
+  // ── render ────────────────────────────────────────────────────
+  function renderLista() {
+    const list  = document.getElementById('guardList');
+    const empty = document.getElementById('emptyState');
+    const total = presentes.length;
+
+    // contadores
+    document.getElementById('heroPresentes').textContent  = total;
+    document.getElementById('countLabel').textContent     = total;
+    document.getElementById('progressFrac').textContent   = `${total} adicionado${total !== 1 ? 's' : ''}`;
+    document.getElementById('progressFill').style.width   = Math.min(total / GUARDAS.length * 100, 100) + '%';
+    document.getElementById('btnSalvar').disabled         = total === 0;
+
+    if (!total) {
+      list.innerHTML = '';
+      empty.classList.add('show');
+      return;
+    }
+
+    empty.classList.remove('show');
+
+    list.innerHTML = getSorted().map((g, i) => `
+      <div class="guard-card presente" style="animation-delay:${i * 20}ms" id="card-${g.id}">
+        <div class="avatar ${avColor(g.id)}">${initials(g.nome)}</div>
+        <div class="guard-info" style="flex:1;min-width:0">
+          <div class="guard-name">${g.nome}</div>
+          <div class="guard-meta">
+            <span class="guard-matricula">${g.matricula}</span>
+            <span class="sep">·</span>
+            <span>${g.ministerio || ''}</span>
+          </div>
+          <div class="obs-wrap show">
+            <input
+              class="obs-input"
+              placeholder="Observação (opcional)…"
+              maxlength="200"
+              value="${g.obs}"
+              oninput="atualizarObs(${g.id}, this.value)"
+            >
+          </div>
         </div>
-
-        <!-- CHART -->
-        <div class="section-label">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M1 9l3-3 2.5 2.5L9 5l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                <rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.3" />
-            </svg>
-            Presença por mês
-            <div class="section-line"></div>
-        </div>
-        <div style="padding:0 16px">
-            <div class="chart-section">
-                <div class="chart-title">Evolução mensal de frequência</div>
-                <div class="chart-sub">Percentual médio de presença no período</div>
-                <div class="chart-bars" id="chartBars"></div>
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background:var(--green)"></div>≥ 75%
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background:var(--yellow)"></div>50–74%
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background:var(--red)"></div>
-                        < 50%</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TABLE -->
-            <div class="section-label">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.3" />
-                    <path d="M1 4h10M4 4v7" stroke="currentColor" stroke-width="1.3" />
-                </svg>
-                Por guarda
-                <div class="section-line"></div>
-            </div>
-            <div class="table-wrap">
-                <div class="table-header">
-                    <span>Guarda</span>
-                    <span>%</span>
-                    <span>Prog.</span>
-                </div>
-                <div id="tableBody"></div>
-            </div>
-
-        </div>
-
-        <!-- EMPTY -->
-        <div class="empty-state" id="emptyState">
-            <div class="empty-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                    <rect x="3" y="3" width="16" height="16" rx="3" stroke="#9ca3af" stroke-width="1.4" />
-                    <path d="M7 11h8M7 7h5M7 15h3" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round" />
-                </svg>
-            </div>
-            <p class="empty-title">Nenhum resultado</p>
-            <p class="empty-sub">Ajuste os filtros e gere o relatório</p>
-        </div>
-        <!-- TOAST -->
-        <div class="toast" id="toast">
-            <div class="toast-icon">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke="#111827" stroke-width="1.8" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-            </div>
-            <span id="toastMsg">Relatório gerado!</span>
-        </div>
-
-        <script>
-            const guardas = [
-                { id: 1, nome: 'Ana Paula Figueiredo', matricula: '2024-0001', ministerio: 'nazare', status: 'ativo', presencas: 18, total: 20 },
-                { id: 2, nome: 'Bruno Tavares Lima', matricula: '2024-0002', ministerio: 'nazare', status: 'ativo', presencas: 14, total: 20 },
-                { id: 3, nome: 'Carla Mendes Souza', matricula: '2023-0047', ministerio: 'andre', status: 'ativo', presencas: 19, total: 20 },
-                { id: 4, nome: 'Diego Costa Ramos', matricula: '2023-0012', ministerio: 'nazare', status: 'licenca', presencas: 8, total: 20 },
-                { id: 5, nome: 'Elaine Rodrigues', matricula: '2024-0018', ministerio: 'andre', status: 'ativo', presencas: 16, total: 20 },
-                { id: 6, nome: 'Felipe Araújo Neto', matricula: '2022-0033', ministerio: 'nazare', status: 'inativo', presencas: 4, total: 20 },
-                { id: 7, nome: 'Gabriela Moraes', matricula: '2024-0025', ministerio: 'andre', status: 'ativo', presencas: 20, total: 20 },
-                { id: 8, nome: 'Henrique Pinheiro', matricula: '2023-0055', ministerio: 'nazare', status: 'ativo', presencas: 11, total: 20 },
-            ];
-
-            const meses = [
-                { label: 'Jan', pct: 72 },
-                { label: 'Fev', pct: 68 },
-                { label: 'Mar', pct: 81 },
-                { label: 'Abr', pct: 76 },
-                { label: 'Mai', pct: 85 },
-                { label: 'Jun', pct: 79 },
-            ];
-
-            let resultData = [];
-
-            // preenche datas default
-            const hoje = new Date();
-            const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
-            document.getElementById('dataInicio').value = primeiroDia.toISOString().split('T')[0];
-            document.getElementById('dataFim').value = hoje.toISOString().split('T')[0];
-
-            function pctClass(p) {
-                if (p >= 75) return 'pct-high';
-                if (p >= 50) return 'pct-mid';
-                return 'pct-low';
-            }
-            function fillClass(p) {
-                if (p >= 75) return 'fill-high';
-                if (p >= 50) return 'fill-mid';
-                return 'fill-low';
-            }
-            function barColor(p) {
-                if (p >= 75) return 'var(--green)';
-                if (p >= 50) return 'var(--yellow)';
-                return 'var(--red)';
-            }
-
-            function gerarRelatorio() {
-                const btn = document.getElementById('applyBtn');
-                btn.classList.add('loading');
-                btn.disabled = true;
-
-                setTimeout(() => {
-                    btn.classList.remove('loading');
-                    btn.disabled = false;
-
-                    const filtMinisterio = document.getElementById('filtroMinisterio').value;
-                    const filtStatus = document.getElementById('filtroStatus').value;
-                    const filtGuarda = document.getElementById('filtroGuarda').value;
-
-                    resultData = guardas.filter(g => {
-                        if (filtMinisterio && g.ministerio !== filtMinisterio) return false;
-                        if (filtStatus && g.status !== filtStatus) return false;
-                        if (filtGuarda && String(g.id) !== filtGuarda) return false;
-                        return true;
-                    });
-
-                    if (!resultData.length) {
-                        document.getElementById('resultSection').style.display = 'none';
-                        document.getElementById('emptyState').classList.add('show');
-                        document.getElementById('exportBtn').disabled = true;
-                        updateHero(0, 0, 0);
-                        return;
-                    }
-
-                    document.getElementById('emptyState').classList.remove('show');
-                    document.getElementById('resultSection').style.display = 'block';
-                    document.getElementById('exportBtn').disabled = false;
-
-                    renderSummary(resultData);
-                    renderChart();
-                    renderTable(resultData);
-                    updateHero(resultData.length, calcMedia(resultData), 20);
-                    showToast('Relatório gerado com sucesso!');
-                }, 900);
-            }
-
-            function calcMedia(data) {
-                const total = data.reduce((s, g) => s + Math.round(g.presencas / g.total * 100), 0);
-                return Math.round(total / data.length);
-            }
-
-            function updateHero(total, media, eventos) {
-                document.getElementById('heroTotal').textContent = total || '—';
-                document.getElementById('heroMedia').textContent = total ? media + '%' : '—';
-                document.getElementById('heroEventos').textContent = total ? eventos : '—';
-            }
-
-            function renderSummary(data) {
-                const totalPresencas = data.reduce((s, g) => s + g.presencas, 0);
-                const media = calcMedia(data);
-                const regulares = data.filter(g => Math.round(g.presencas / g.total * 100) >= 75).length;
-                const irregulares = data.filter(g => Math.round(g.presencas / g.total * 100) < 50).length;
-                document.getElementById('sumPresentes').textContent = totalPresencas;
-                document.getElementById('sumMedia').textContent = media + '%';
-                document.getElementById('sumRegulares').textContent = regulares;
-                document.getElementById('sumIrregulares').textContent = irregulares;
-            }
-
-            function renderChart() {
-                const bars = document.getElementById('chartBars');
-                const max = Math.max(...meses.map(m => m.pct));
-                bars.innerHTML = meses.map(m => {
-                    const h = Math.round((m.pct / max) * 76);
-                    const col = barColor(m.pct);
-                    return `
-    <div class="bar-col">
-      <div class="bar-body" style="height:${h}px;background:${col};width:100%" data-tip="${m.pct}%"></div>
-      <span class="bar-month">${m.label}</span>
-    </div>`;
-                }).join('');
-            }
-
-            function renderTable(data) {
-                const sorted = [...data].sort((a, b) => {
-                    const pa = Math.round(a.presencas / a.total * 100);
-                    const pb = Math.round(b.presencas / b.total * 100);
-                    return pb - pa;
-                });
-
-                document.getElementById('tableBody').innerHTML = sorted.map((g, i) => {
-                    const pct = Math.round(g.presencas / g.total * 100);
-                    return `
-    <div class="table-row" style="animation:fadeUp .2s ease ${i * 30}ms both" onclick="alert('Ver detalhe de ${g.nome}')">
-      <div>
-        <div class="row-name">${g.nome}</div>
-        <div class="row-matricula">${g.matricula} · ${g.presencas}/${g.total} eventos</div>
+        <button class="remove-btn" onclick="remover(${g.id})" aria-label="Remover">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
       </div>
-      <div class="row-pct">
-        <span class="pct-pill ${pctClass(pct)}">${pct}%</span>
-      </div>
-      <div class="row-bar">
-        <div class="bar-track">
-          <div class="bar-fill ${fillClass(pct)}" style="width:${pct}%"></div>
-        </div>
-      </div>
-    </div>`;
-                }).join('');
-            }
+    `).join('');
+  }
 
-            function exportar() {
-                if (!resultData.length) return;
+  function atualizarObs(id, val) {
+    const p = presentes.find(x => x.id === id);
+    if (p) p.obs = val;
+  }
 
-                const linhas = [
-                    'Nome,Matrícula,Presenças,Total,Percentual',
-                    ...resultData.map(g => {
-                        const pct = Math.round(g.presencas / g.total * 100);
-                        return `"${g.nome}",${g.matricula},${g.presencas},${g.total},${pct}%`;
-                    })
-                ];
+  // ── salvar ────────────────────────────────────────────────────
+  function salvarChamada() {
+    const btn = document.getElementById('btnSalvar');
+    btn.classList.add('loading');
+    btn.disabled = true;
 
-                const blob = new Blob([linhas.join('\n')], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'relatorio-frequencia.csv';
-                a.click();
-                URL.revokeObjectURL(url);
-                showToast('CSV exportado!');
-            }
+    const payload = presentes.map(g => ({
+      guarda_id:             g.id,
+      reconhecimento_facial: 0,
+      observacao:            g.obs || null,
+    }));
 
-            function showToast(msg) {
-                const t = document.getElementById('toast');
-                document.getElementById('toastMsg').textContent = msg;
-                t.classList.add('show');
-                setTimeout(() => t.classList.remove('show'), 2800);
-            }
+    console.log('POST /eventos/{{ evento.id }}/frequencias', payload);
 
-            // anim fadeUp inline
-            const style = document.createElement('style');
-            style.textContent = '@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}';
-            document.head.appendChild(style);
-        </script>
-</body>
+   
+
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      showToast(`${presentes.length} presença${presentes.length > 1 ? 's' : ''} registrada${presentes.length > 1 ? 's' : ''}!`);
+      setTimeout(() => history.back(), 1600);
+    }, 1000);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+</script>
+
 {% endblock %}
