@@ -38,6 +38,71 @@ body {
   overflow: hidden;
 }
 
+.export-btn {
+  height: 34px;
+  padding: 0 14px;
+  background: var(--amber);
+  color: var(--dark);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity .15s, transform .1s
+}
+
+.export-btn:hover {
+  opacity: .88
+}
+
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--gray);
+  transition: background .15s, color .15s;
+}
+
+.back-btn:hover {
+  background: var(--bg);
+  color: var(--dark);
+}
+
+.page-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark);
+}
+
 /* BODY */
 .body {
   padding: 1rem;
@@ -231,12 +296,10 @@ body {
 }
 
 .progress-fill {
-  background: linear-gradient(
-    90deg,
-    #db0b0b 0%,
-    var(--accent) 60%,
-    #36d512 100%
-  );
+  background: linear-gradient(90deg,
+      #db0b0b 0%,
+      var(--accent) 60%,
+      #36d512 100%);
 }
 
 .xp-fill {
@@ -373,7 +436,7 @@ body {
   border-radius: 8px;
 
   background: #f9fafb;
-  border: .5px solid rgba(0,0,0,.08);
+  border: .5px solid rgba(0, 0, 0, .08);
 }
 
 .badge-item.earned {
@@ -415,7 +478,7 @@ body {
   padding: .45rem .85rem;
 
   border-radius: 999px;
-  border: .5px solid rgba(0,0,0,.12);
+  border: .5px solid rgba(0, 0, 0, .12);
 
   background: var(--white);
 }
@@ -456,7 +519,7 @@ body {
   padding: 4px 10px;
 
   border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.1);
+  border: 1px solid rgba(0, 0, 0, .1);
 
   background: #f9fafb;
   color: var(--muted);
@@ -481,7 +544,7 @@ body {
 
   padding: .65rem 0;
 
-  border-bottom: .5px solid rgba(0,0,0,.07);
+  border-bottom: .5px solid rgba(0, 0, 0, .07);
 }
 
 .event-row:last-child {
@@ -569,7 +632,7 @@ body {
 
   padding: 1rem;
 
-  background: rgba(0,0,0,.72);
+  background: rgba(0, 0, 0, .72);
 
   z-index: 9999;
 }
@@ -583,7 +646,7 @@ body {
   border-radius: 24px;
   background: var(--white);
 
-  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
 }
 
 /* CARTEIRINHA */
@@ -595,7 +658,7 @@ body {
   color: var(--white);
 
   background:
-    linear-gradient(rgba(7,33,63,.86), rgba(7,33,63,.86)),
+    linear-gradient(rgba(7, 33, 63, .86), rgba(7, 33, 63, .86)),
     url('../img/VETOR-GMNSN.png');
 
   background-size: cover;
@@ -644,7 +707,7 @@ body {
   border-radius: 16px;
   background: var(--white);
 
-  box-shadow: 0 7px 20px rgba(0,0,0,.08);
+  box-shadow: 0 7px 20px rgba(0, 0, 0, .08);
 }
 
 .close {

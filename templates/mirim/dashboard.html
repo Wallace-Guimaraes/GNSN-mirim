@@ -8,12 +8,10 @@ Perfil Mirim
 {% block head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-<link rel="stylesheet" href="{% static 'css/frequencia.css' %}">
-
 {% endblock %}
 
 {% block topbar_action %}
-<button class="export-btn" type="button" onclick="gerarCarteira()">
+<button class="export-btn" id="exportBtn" onclick="gerarCarteira()">
   <i class="ti ti-qrcode" style="font-size:18px;"></i>
   QRCode
 </button>
