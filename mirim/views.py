@@ -22,5 +22,9 @@ def eventos(request):
 
 def relatorio(request):
     return render(request, "mirim/relatorio.html")
+
+def admin(request):
+    return render(request, "mirim/admin.html")
+ 
  
  

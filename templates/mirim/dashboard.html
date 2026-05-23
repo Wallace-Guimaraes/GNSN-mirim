@@ -5,6 +5,13 @@
 Perfil Mirim
 {% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/frequencia.css' %}">
+
+{% endblock %}
+
 {% block topbar_action %}
 <button class="export-btn" type="button" onclick="gerarCarteira()">
   <i class="ti ti-qrcode" style="font-size:18px;"></i>
@@ -13,12 +20,6 @@ Perfil Mirim
 {% endblock %}
 
 {% block body %}
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-<link rel="stylesheet" href="{% static 'css/frequencia.css' %}">
-
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <!-- MODAL CARTEIRINHA Incompleto -->

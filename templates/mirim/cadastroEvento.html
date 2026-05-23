@@ -5,17 +5,16 @@
 Cadastrar evento
 {% endblock %}
 
-{% block body %}
-<head>
+{% block head %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cadastrar Evento</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/cadastroEvento.css' %}">
-</head>
-<body>
+{% endblock %}
 
+{% block body %}
 <!-- HERO STRIP -->
 <div class="hero-strip" style="background-color: #0c3967;">
   <div class="hero-label">Novo registro</div>
@@ -313,5 +312,4 @@ function showToast(msg, isError) {
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('data').min = today;
 </script>
-</body>
 {% endblock %}

@@ -5,6 +5,17 @@
 Relatório
 {% endblock %}
 
+{% block head %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Frequência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/frequencia.css' %}">
+{% endblock %}
+
 {% block topbar_action %}
 <button class="export-btn" id="exportBtn" onclick="exportar()" disabled>
 
@@ -20,18 +31,6 @@ Relatório
 {% endblock %}
 
 {% block body %}
-
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Frequência</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/frequencia.css' %}">
-</head>
-
 <!-- HERO -->
 <div class="hero-strip">
     <div class="hero-label">Relatório</div>
