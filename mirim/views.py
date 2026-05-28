@@ -25,6 +25,11 @@ def relatorio(request):
 
 def admin(request):
     return render(request, "mirim/admin.html")
+
+def cadastroGuarda(request):
+    return render(request, "mirim/cadastroGuarda.html")
+ 
+ 
  
  
  

@@ -12,4 +12,5 @@ urlpatterns = [
     path("eventos/", views.eventos, name="eventos"),
     path("relatorio/", views.relatorio, name="relatorio"),
     path("admin/", views.admin, name="admin"),
+    path("cadastro-guarda/", views.cadastroGuarda, name="cadastro_guarda"),
 ]
